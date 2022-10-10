@@ -23,4 +23,5 @@ class FallPin{
     const byte mbd = A12;  // 中 後 向下偵測
     const size_t size = 8;
 };
+
 #endif

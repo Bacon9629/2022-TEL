@@ -10,10 +10,11 @@ class Communicate
 private:
     HardwareSerial *jetson_nano_Serial;
     HardwareSerial *control_mega_Serail;
-    // HardwareSerial *jy61_Serail;
+    HardwareSerial *jy61_Serail;
 
     int first_angle = 0;
     Tool tool;
+    bool jy61_have_regist = false;
 
     void (*recieve_jetson_nano)(char dir_code, int speed, int target_angle, int servo0_angle, int servo1_angle);
     void (*recieve_jetson_nano_action)(char mission_code);
@@ -25,6 +26,8 @@ private:
 public:
     Communicate();
     ~Communicate();
+
+    void reset_angle_offset();
 
     void attach_jetson_nano_Serial(
         HardwareSerial *jetson_nano_Serial,
@@ -41,6 +44,8 @@ public:
 
     void send_jetson_nano_mission(bool mission_success);
     void send_motor_mega(int now_angle, int target_angle, char dir_code, int speed);
+
+    inline int get_angle();
 
 
 };

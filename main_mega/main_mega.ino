@@ -19,7 +19,7 @@ Tool tool;
 Communicate commu;
 HandServo hand_servo;
 FallPin fallpin;
-FallDetect falldetct;
+FallDetect falldetect(hand_servo);
 
 Servo storage_hand_servo;
 
@@ -35,37 +35,142 @@ void mission_f();  // 第一關定位到起點方框後
 
 void setup(){
 
-    // Serial.begin(115200);
-    // commu.attach_jetson_nano_Serial(&Serial1, &recieve_jetson_nano, &recieve_jetson_nano_action);
-    // commu.attach_control_mega_Serail(&Serial2);
-    // commu.attach_jy61_Serial(&Serial3, &recieve_jy61_now_angle);
+    Serial.begin(115200);
 
-    hand_servo.attach(hand_servos_pin, pump_pin);
+    commu.attach_jetson_nano_Serial(&Serial2, &recieve_jetson_nano, &recieve_jetson_nano_action);
+    commu.attach_control_mega_Serail(&Serial1);
+    commu.attach_jy61_Serial(&Serial3, &recieve_jy61_now_angle);
+
+    hand_servo.attach(hand_servos_pin, pump_pin, relay_pin);
+    hand_servo.move_hand(115, 110);
     storage_hand_servo.attach(storage_hand_pin);
 
-    falldetct.enable(true);
+    delay(300);
+    commu.reset_angle_offset();
+
+    // falldetect.enable(true);
+
+    Serial.println("gogo");
+    // hand_servo.active_pump(true);
 
 }
 
 void loop(){
+    // commu.read_serial_buffer();
+
+    // Serial.println(commu.get_angle());
+    // commu.send_motor_mega(commu.get_angle(), 0, 'w', 60);
+    // delay(20);
+
+
+    Serial.println(falldetect.get_distance(fallpin.mfd));
+    // hand_servo.temp_detach();
+    // Serial.println(13 * pow((analogRead(fallpin.rmf) * 0.0048828125), -1));
+    // delay(500);
+
+    // commu.get_angle();
+    // Serial.println(commu.get_angle());
+    // delay(200);
+    
+    // Serial.println(commu.get_angle());
+    // commu.send_motor_mega(0, 0, 'w', 60);
+
+    // if (Serial.available()){
+    //     char a = Serial.read();
+    //     commu.send_motor_mega(0, 0, a, 120);
+    //     Serial.println(a);
+    // }
+
+    // if (Serial.available()){
+    //     char a = Serial.read();
+    //     hand_servo.active_pump(a == '1');
+    // }
+
+    // int a = falldetect.get_distance(12);
+    // int a = falldetect.get_is_fall(fallpin.lff);
+    // Serial.println(a);
+
+    // Serial.println("do_");
+    // delay(3000);
+    // Serial.println("no do");
+    // hand_servo.active_pump(false);  
+    // Serial.println("no do_");
+    // delay(3000);
+
+    // hand_servo.active_pump(false);
 
     // commu.read_serial_buffer();
-    int a = analogRead(A0);
-    int b = analogRead(A1);
 
-    a = map(a, 0, 1024, 0, 255);
-    b = map(b, 0, 1024, 0, 255);
+    // if (Serial2.available()){
+    //     char temp = Serial2.read();
+    //     if (temp == '[')
+    //         Serial.println();
+    //     Serial.print(temp);
+        
+    // }
 
-    hand_servo.move_hand(a, b);
+    // 測試手臂連續移動 - start
+    // static int a = 90;
+    // static int b = 115;
+    // static bool a_ = 0;
+    // static bool b_ = 0;
+    // hand_servo.move_hand(a, b);
+    // delay(10);
+    // a += a_? 1: -1;
+    // if (a >= 175){
+    //     a_ = false;
+    // }else if(a <= 5){
+    //     a_ = true;
+    // }
+    // 測試手臂連續移動 - end
 
+
+    //hand servo manual control - start
+
+    // static int a = 45;
+    // static int b = 45;
+    // char code = Serial.read();
+    // delay(1);
+    // if (Serial.available() && code == '<'){
+    //     a = tool.char2int(&Serial);
+    //     Serial.read();
+    //     b = tool.char2int(&Serial);
+    //     hand_servo.move_hand(a, b);
+
+        
+    //     char temp[10];
+    //     sprintf(temp, "%03d, %03d", b, a);
+    //     Serial.println(temp);
+    // }
+
+    // if (code == 10){
+    //     char temp[10];
+    //     sprintf(temp, "%03d, %03d", b, a);
+    //     Serial.println(temp);
+    // }
+
+    // hand servo manual control - end
 
 }
 
-void recieve_jetson_nano(char dir_code, int speed, int target_angle, int servo0_angle, int servo1_angle){
-    commu.send_motor_mega(now_angle, target_angle, dir_code, speed);
+void recieve_jetson_nano(char dir_code, int speed, int _target_angle, int servo0_angle, int servo1_angle){
+    commu.send_motor_mega(now_angle, _target_angle, dir_code, speed);
 
-    int servo_angle[2] = {servo0_angle, servo1_angle};
-    hand_servo.do_it(servo_angle, pump_active);
+    hand_servo.move_hand(servo0_angle, servo1_angle);
+
+    move_dir_code = dir_code;
+    move_speed = speed;
+    target_angle = _target_angle;
+    hand_motor_angle[0] = servo0_angle;
+    hand_motor_angle[1] = servo1_angle;
+
+    
+
+    // hand_servo.move_hand(servo0_angle, servo1_angle);
+
+    char temp[30];
+    sprintf(temp, "%c, %03d, %03d, %03d, %03d", dir_code, speed, _target_angle, servo0_angle, servo1_angle);
+    Serial.println(temp);
 }
 
 void recieve_jetson_nano_action(char mission_code){
@@ -73,18 +178,22 @@ void recieve_jetson_nano_action(char mission_code){
      * 接收任務指令，做完後須回傳做得如何
      * commu.send_jetson_nano_mission(bool mission_success)
      */
+
+    bool good_done = true;
+
     switch (mission_code)
     {
         case 'a':{
             // 吸盤吸
             hand_servo.active_pump(true);
+            Serial.println("A");
             break;
         }
         
         case 'b':{
             // 吸盤放
             hand_servo.active_pump(false);
-
+            Serial.println("B");
             break;
         }
         
@@ -157,7 +266,7 @@ void recieve_jetson_nano_action(char mission_code){
     }
 
 
-    commu.send_jetson_nano_mission(true);
+    commu.send_jetson_nano_mission(good_done);
 
 }
 
@@ -183,41 +292,41 @@ void mission_e(){
         commu.send_motor_mega(now_angle, target_angle, 'q', speed_range[2]);
     }
     
-    // 慢速左前，直到到邊緣
-    while(!falldetct.get_is_fall(fallpin.lmd)){
-        commu.read_serial_buffer();
-        commu.send_motor_mega(now_angle, target_angle, 'q', speed_range[0]);
-    }
+    // // 慢速左前，直到到邊緣
+    // while(!falldetect.get_is_fall(fallpin.lmd)){
+    //     commu.read_serial_buffer();
+    //     commu.send_motor_mega(now_angle, target_angle, 'q', speed_range[0]);
+    // }
 
-    // 中速前，直到到邊緣
-    while(!falldetct.get_is_arrive(fallpin.mfd)){
-        commu.read_serial_buffer();
-        if (falldetct.get_is_fall(fallpin.lmd)){
-            commu.send_motor_mega(now_angle, target_angle, 'e', speed_range[1]);
-        }else{
-            commu.send_motor_mega(now_angle, target_angle, 'w', speed_range[1]);
-        }
-    }
+    // // 中速前，直到到邊緣
+    // // while(!falldetect.get_is_arrive(fallpin.mfd)){
+    // //     commu.read_serial_buffer();
+    // //     if (falldetect.get_is_fall(fallpin.lmd)){
+    // //         commu.send_motor_mega(now_angle, target_angle, 'e', speed_range[1]);
+    // //     }else{
+    // //         commu.send_motor_mega(now_angle, target_angle, 'w', speed_range[1]);
+    // //     }
+    // // }
 
-    // 慢速左，直到到邊緣
-    while(!falldetct.get_is_fall(fallpin.lmd)){
-        commu.read_serial_buffer();
-        commu.send_motor_mega(now_angle, target_angle, 'a', speed_range[0]);
-    }
+    // // 慢速左，直到到邊緣
+    // while(!falldetect.get_is_fall(fallpin.lmd)){
+    //     commu.read_serial_buffer();
+    //     commu.send_motor_mega(now_angle, target_angle, 'a', speed_range[0]);
+    // }
 
-    // 中速右
-    now_t = millis();
-    while(now_t - millis() > 1000){
-        commu.read_serial_buffer();
-        commu.send_motor_mega(now_angle, target_angle, 'd', speed_range[1]);
-    }
+    // // 中速右
+    // now_t = millis();
+    // while(now_t - millis() > 1000){
+    //     commu.read_serial_buffer();
+    //     commu.send_motor_mega(now_angle, target_angle, 'd', speed_range[1]);
+    // }
 
-    // 向後
-    now_t = millis();
-    while(now_t - millis() > 1000){
-        commu.read_serial_buffer();
-        commu.send_motor_mega(now_angle, target_angle, 's', speed_range[1]);
-    }
+    // // 向後
+    // now_t = millis();
+    // while(now_t - millis() > 1000){
+    //     commu.read_serial_buffer();
+    //     commu.send_motor_mega(now_angle, target_angle, 's', speed_range[1]);
+    // }
 
 
     // finish

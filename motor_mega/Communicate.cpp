@@ -62,6 +62,23 @@ void Communicate::read_code_buffer()
                 delay(1);
                 int data1 = char2int(_serial);
                 int data2 = char2int(_serial);
+
+                if (data1 > 180){
+                    data1 -= 360;
+                }else if(data1 < -180){
+                    data1 += 360;
+                }
+
+                if (data2 > 180){
+                    data2 -= 360;
+                }else if(data2 < -180){
+                    data2 += 360;
+                }
+
+                // data1 *= -1;
+                // data2 *= -1;
+
+
                 if (recieve_angel_func)
                 {
                     (*recieve_angel_func)(data1, data2);

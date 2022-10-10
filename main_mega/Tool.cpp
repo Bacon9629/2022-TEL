@@ -19,7 +19,8 @@ int Tool::char2int(char *data){
         data[1] - '0',
         data[2] - '0'
     };
-    return int(temp[0]) * 100 + temp[1] * 10 + temp[2];
+    Serial.println(int(temp[0]) * 100 + temp[1] * 10 + temp[2]);
+    return int(temp[0]) * 100 + int(temp[1]) * 10 + int(temp[2]);
 }
 
 int Tool::char2int(HardwareSerial *Serial_temp){
@@ -28,6 +29,5 @@ int Tool::char2int(HardwareSerial *Serial_temp){
         Serial_temp->read(),
         Serial_temp->read()
         };
-
     return Tool::char2int(data);
 }

@@ -9,10 +9,10 @@ const int lb_pwm_pin = 6;
 const int rf_pwm_pin = 5;
 const int rb_pwm_pin = 3;
 
-const int lf_dir_pin = 36;
-const int lb_dir_pin = 34;
-const int rf_dir_pin = 32;
-const int rb_dir_pin = 30;
+const int lf_dir_pin = 37;
+const int lb_dir_pin = 35;
+const int rf_dir_pin = 33;
+const int rb_dir_pin = 31;
 
 byte all_pwm_pin[4] = {lf_pwm_pin, lb_pwm_pin, rf_pwm_pin, rb_pwm_pin};
 byte all_dir_pin[4] = {lf_dir_pin, lb_dir_pin, rf_dir_pin, rb_dir_pin};
@@ -40,7 +40,9 @@ void setup() {
     digitalWrite(all_dir_pin[i], 1);
   }
 
-  comm.attach_Serial(&Serial);
+  // Serial.begin(115200);
+
+  comm.attach_Serial(&Serial1);
   // comm.start_debug_with_Serial0();
   // motor.start_debug_with_Serial0();
 
@@ -54,13 +56,35 @@ void loop() {
   // put your main code here, to run repeatedly:
   comm.read_code_buffer();
 
+  // motor.one_wheel_move(2,120);
+
   // motor.move('w', 120, 0);
+  // delay(3000);
+  // motor.move('p', 120, 0);
+  // delay(500);
+  // motor.move('d', 120, 0);
+  // delay(3000);
+  // motor.move('d', 1, 0);
+  // delay(500);
+
+  // digitalWrite(lf_dir_pin, 1);
+  // digitalWrite(lb_dir_pin, 0);
+  // digitalWrite(rf_dir_pin, 1);
+  // digitalWrite(rb_dir_pin, 1);
+  // analogWrite(lf_pwm_pin, 220);
+  // analogWrite(lb_pwm_pin, 220);
+  // analogWrite(rf_pwm_pin, 220);
+  // analogWrite(rb_pwm_pin, 220);
   
 }
 
 void recieve_angle(int now_angle_, int target_angle_){
   now_angle = now_angle_;
   target_angle = target_angle_;
+  
+  // char temp[30];
+  // sprintf(temp, "%03d, %03d", now_angle, target_angle);
+  // Serial.println(temp);
 }
 
 void recieve_move(char dir_code, int speed){
