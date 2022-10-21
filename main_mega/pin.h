@@ -8,7 +8,7 @@ const byte hand_servos_pin[2] = {6, 7};
 const byte pump_pin = 4;
 const byte relay_pin = 3;
 
-const byte storage_hand_pin = 0;
+const byte storage_hand_pin = 5;
 
 class FallPin{
     public:

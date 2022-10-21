@@ -75,6 +75,7 @@ void loop() {
   // analogWrite(lb_pwm_pin, 220);
   // analogWrite(rf_pwm_pin, 220);
   // analogWrite(rb_pwm_pin, 220);
+
   
 }
 
@@ -93,6 +94,9 @@ void recieve_move(char dir_code, int speed){
    * 
    */
 
+  // char temp[30];
+  // sprintf(temp, "%c, %03d", dir_code, speed);
+  // Serial.println(temp);
 
   motor.move(dir_code, speed, now_angle - target_angle);
   // motor.move(dir_code, speed, target_angle, now_angle);

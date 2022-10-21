@@ -132,7 +132,7 @@ void Communicate::jetson_nano_serial_read(){
             int servo0 = tool.char2int(jetson_nano_Serial);
             int servo1 = tool.char2int(jetson_nano_Serial);
 
-            if (target_angle > 360){
+            if (target_angle > 180){
                 target_angle -= 360;
             }else if(target_angle < 0){
                 target_angle += 360;
@@ -155,11 +155,17 @@ void Communicate::jetson_nano_serial_read(){
             break;
 
         }
+
+        // default:{
+        //     char temp[20];
+        //     sprint(temp, "trash: %c");
+        //     break;
+        // }
     }
     
-    while((*jetson_nano_Serial).available()){
-        (*jetson_nano_Serial).read();
-    }
+    // while((*jetson_nano_Serial).available()){
+    //     (*jetson_nano_Serial).read();
+    // }
 
 };
 

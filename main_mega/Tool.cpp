@@ -19,7 +19,7 @@ int Tool::char2int(char *data){
         data[1] - '0',
         data[2] - '0'
     };
-    Serial.println(int(temp[0]) * 100 + temp[1] * 10 + temp[2]);
+    Serial.print(int(temp[0]) * 100 + temp[1] * 10 + temp[2]);
     return int(temp[0]) * 100 + int(temp[1]) * 10 + int(temp[2]);
 }
 

@@ -15,8 +15,8 @@ void HandServo::attach(const byte servo_pin[2], const byte pump_pin, const byte 
     this->servo_pin[1] = servo_pin[1];
     this->pump_pin = pump_pin;
     this->relay_pin = relay_pin;
-    // pinMode(pump_pin, OUTPUT);
-    // pinMode(relay_pin, OUTPUT);
+    pinMode(pump_pin, OUTPUT);
+    pinMode(relay_pin, OUTPUT);
     
     active_pump(false);
 }

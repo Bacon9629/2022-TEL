@@ -26,6 +26,12 @@ void FallDetect::sort(double *list, size_t size){
     }
 }
 
+/**
+ * @brief 取得偵測器距離，若超過30則回傳100
+ * 
+ * @param pin 要偵測的感測器
+ * @return int 偵測器偵測到的距離，超過30則輸出100
+ */
 int FallDetect::get_distance(byte pin){
     if (!enable_active) {
         return 0;
@@ -60,6 +66,9 @@ int FallDetect::get_distance(byte pin){
     result = history[50];
 
     hand_servo.re_attach();
+    if (result > 30){
+        return 100;
+    }
     return int(result);
 }
 
