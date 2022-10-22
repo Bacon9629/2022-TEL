@@ -39,7 +39,7 @@ void setup(){
 
     commu.attach_jetson_nano_Serial(&Serial2, &recieve_jetson_nano, &recieve_jetson_nano_action);
     commu.attach_control_mega_Serail(&Serial1);
-    commu.attach_jy61_Serial(&Serial3, &recieve_jy61_now_angle);
+    // commu.attach_jy61_Serial(&Serial3, &recieve_jy61_now_angle);
 
     hand_servo.attach(hand_servos_pin, pump_pin, relay_pin);
     hand_servo.move_hand(115, 110);
@@ -59,6 +59,9 @@ void setup(){
 }
 
 void loop(){
+    Serial.print(falldetect.get_distance(fallpin.mbd));
+    Serial.print(" ");
+    Serial.println(falldetect.get_is_arrive(fallpin.mbd));
 
     commu.read_serial_buffer();
 
