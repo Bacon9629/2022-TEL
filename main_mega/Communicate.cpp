@@ -36,7 +36,7 @@ void Communicate::attach_jy61_Serial(
     void (*recieve_jy61_now_angle)(int now_angle)
     ){
     // this->jy61_Serail = jy61_Serail;
-    jy61_have_regist = true;
+    jy61_enable = true;
 
     (*jy61_Serail).begin(115200);
     JY901.attach(*jy61_Serail);
@@ -188,7 +188,7 @@ int Communicate::jy61_serial_read(){
 };
 
 inline int Communicate::get_angle(){
-    if (!jy61_have_regist){
+    if (!jy61_enable){
         return 0;
     }
     JY901.receiveSerialData();
@@ -202,3 +202,6 @@ inline int Communicate::get_angle(){
     return now_angle;
 }
 
+void Communicate::set_jy61_enable(bool enable){
+    jy61_enable = enable;
+}

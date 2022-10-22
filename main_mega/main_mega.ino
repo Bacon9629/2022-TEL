@@ -39,7 +39,7 @@ void setup(){
 
     commu.attach_jetson_nano_Serial(&Serial2, &recieve_jetson_nano, &recieve_jetson_nano_action);
     commu.attach_control_mega_Serail(&Serial1);
-    // commu.attach_jy61_Serial(&Serial3, &recieve_jy61_now_angle);
+    commu.attach_jy61_Serial(&Serial3, &recieve_jy61_now_angle);
 
     hand_servo.attach(hand_servos_pin, pump_pin, relay_pin);
     hand_servo.move_hand(115, 110);
@@ -59,9 +59,6 @@ void setup(){
 }
 
 void loop(){
-    Serial.print(falldetect.get_distance(fallpin.mbd));
-    Serial.print(" ");
-    Serial.println(falldetect.get_is_arrive(fallpin.mbd));
 
     commu.read_serial_buffer();
 
@@ -199,11 +196,30 @@ void recieve_jetson_nano_action(char mission_code){
         }
         
         case 'q':{
-            // 第一關重新定位到方框後側
+            // 第一關重新定位到方框後側偵測
 
             break;
         }
+
+        case 'r':{
+            // 回傳各感測器是否偵測到
+            if (falldetect.get_is_arrive(fallpin.mfd) || falldetect.get_is_fall(fallpin.lmd) || falldetect.get_is_fall(fallpin.rmd)){
+                good_done = false;
+            }
+            break;
+        }
         
+        case 's':{
+            // 關閉回正
+            commu.set_jy61_enable(false);
+            break;
+        }
+        
+        case 't':{
+            // 開啟回正
+            commu.set_jy61_enable(true);
+            break;
+        }
 
         case 'z':{
             // 回正
@@ -247,6 +263,8 @@ void mission_e(){
     while(!falldetect.get_is_arrive(fallpin.mfd)){
         move('w', speed_range[1], 50);
     }
+
+
     
     move('p', speed_range[1], 300);
     move('s', speed_range[1], 300);
@@ -327,27 +345,45 @@ void stay_center(){
     int right_distance = falldetect.get_distance(fallpin.rff);
     int error_distance = abs(left_distance - right_distance);
 
-    while(left_distance == 100 || right_distance == 100){  // 
-        if (error_distance > 3){ // 如果兩距離感測偵測到差了 3 以上，則執行偏移，否則直走
-            if (left_distance > right_distance){  // 要向左偏移
-                move('q', speed_range[1], 100);
-            }else{  // 要向右偏移
-                move('e', speed_range[1], 100);
-            }
-        }else{
-            move('w', speed_range[1], 100);
-        }
+    while(left_distance == 100 || right_distance == 100){
+
+
+        target_angle = (right_distance - left_distance) * 2;
+        move('w', speed_range[1], 50);
+
+        // if (error_distance > 3){ // 如果兩距離感測偵測到差了 3 以上，則執行偏移，否則直走
+        //     if (left_distance > right_distance){  // 要向左偏移
+        //         move('q', speed_range[1], 50);
+        //     }else{  // 要向右偏移
+        //         move('e', speed_range[1], 50);
+        //     }
+        // }else{
+        //     move('w', speed_range[1], 50);
+        // }
 
         left_distance = falldetect.get_distance(fallpin.lff);
         right_distance = falldetect.get_distance(fallpin.rff);
         error_distance = abs(left_distance - right_distance);
+        now_angle = commu.get_angle();
 
     }
+
+    target_angle = 0;
     
 }
 
+/**
+ * @brief 在main_mega程式內才能呼叫的移動函式
+ * 
+ * @param direction 移動指令編碼
+ * @param speed 速度
+ * @param delay_time 要移動多久時間
+ */
 void move(char direction, int speed, unsigned long delay_time){
-    commu.send_motor_mega(now_angle, target_angle, direction, speed);
+    for (size_t i = 0; i < delay_time; i += 20){
+        now_angle = commu.get_angle();
+        commu.send_motor_mega(now_angle, target_angle, direction, speed);
+    }
     delay(delay_time);
 }
 
@@ -359,8 +395,8 @@ void move(char direction, int speed, unsigned long delay_time){
  */
 void goto_edge(byte sensor, char direction, int speed){
     while(!falldetect.get_is_fall(sensor)){
-        commu.read_serial_buffer();
-        commu.send_motor_mega(now_angle, target_angle, 'direction', speed);
+        move(direction, speed, 40);
+        // commu.send_motor_mega(now_angle, target_angle, direction, speed);
     }
 }
 
@@ -374,8 +410,8 @@ void goto_edge(byte sensor, char direction, int speed){
  */
 void goto_until_detect(byte sensor, char direction, int speed, int distance){
     while(falldetect.get_distance(sensor) >= distance){
-        commu.read_serial_buffer();
-        commu.send_motor_mega(now_angle, target_angle, 'direction', speed);
+        move(direction, speed, 40);
+        // commu.send_motor_mega(now_angle, target_angle, 'direction', speed);
     }
 }
 
@@ -390,8 +426,7 @@ void goto_until_detect(byte sensor, char direction, int speed, int distance){
  */
 void goto_until_no_detect(byte sensor, char direction, int speed, int distance){
     while(falldetect.get_distance(sensor) <= distance){
-        commu.read_serial_buffer();
-        commu.send_motor_mega(now_angle, target_angle, 'direction', speed);
+        move(direction, speed, 40);
     }
 }
 
@@ -410,7 +445,7 @@ void toward_target_angle(){
                 angle > 0 ? 'n' : 'm', 
                 map(angle_unsigned, 0, 180, 20, 100)
             );
-            delay(50);
+            delay(40);
 
             now_angle = commu.get_angle();
             angle = now_angle - target_angle;

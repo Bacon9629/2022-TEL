@@ -14,7 +14,7 @@ private:
 
     int first_angle = 0;
     Tool tool;
-    bool jy61_have_regist = false;
+    bool jy61_enable = false;
 
     void (*recieve_jetson_nano)(char dir_code, int speed, int target_angle, int servo0_angle, int servo1_angle);
     void (*recieve_jetson_nano_action)(char mission_code);
@@ -46,6 +46,8 @@ public:
     void send_motor_mega(int now_angle, int target_angle, char dir_code, int speed);
 
     inline int get_angle();
+
+    void set_jy61_enable(bool);
 
 
 };
