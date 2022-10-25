@@ -77,13 +77,13 @@ bool FallDetect::get_is_arrive(byte pin){
         return false;
     }
 
-    if (pin == fallpin.mfd){
-        return get_distance(pin) <= 6;
+    // if (pin == fallpin.mfd){
+    //     return get_distance(pin) <= 7;
 
-    }else if(pin == fallpin.mbd){
-        return get_distance(pin) <= 6;
+    // }else if(pin == fallpin.mbd){
+    //     return get_distance(pin) <= 7;
 
-    }
+    // }
 
     return get_distance(pin) <= _FALL_SENSOR_DETECT_ARRIVE_DISTANCE_;
 }
