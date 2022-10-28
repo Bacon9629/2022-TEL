@@ -61,28 +61,42 @@ void setup(){
 }
 
 void loop(){
-    // Serial.println(falldetect.get_distance(fallpin.mfd));
-    
 
-    // if (Serial.available()){
-    //     char temp = Serial.read();
-    //     if (temp == 'a'){
-    //         first_go_front_side();
-    //     }else if(temp == 'b'){
-    //         first_re_go_front_side();
-    //     }else if(temp == 'c'){
-    //         first_go_right_side();
-    //     }else if(temp == 'd'){
-    //         first_re_go_right_side();
-    //     }else if(temp == 'e'){
-    //         first_go_back_side();
-    //     }else if(temp == 'f'){
-    //         first_re_go_back_side();
-    //     }else if(temp == 'z'){
-    //         target_angle = -135;
-    //         toward_target_angle();
-    //     }
-    // }
+
+    if (Serial.available()){
+        char temp = Serial.read();
+        if (temp == 'a'){
+            first_go_front_side();
+        }else if(temp == 'b'){
+            first_re_go_front_side();
+        }else if(temp == 'c'){
+            first_go_right_side();
+        }else if(temp == 'd'){
+            first_re_go_right_side();
+        }else if(temp == 'e'){
+            first_go_back_side();
+        }else if(temp == 'f'){
+            first_re_go_back_side();
+        }else if(temp == 'z'){
+            target_angle = -135;
+            toward_target_angle();
+        }else if (temp == 'g'){
+        }
+    }
+
+    // move('w', speed_range[0], 10);
+    
+    // goto_edge(fallpin.lmd, 'a', speed_range[0]);
+    // move('d', speed_range[0], 100);
+    // delay(1000);
+    // goto_until_detect(fallpin.mfd, 'w', speed_range[0], 12);
+    // delay(1000000);
+
+    // hand_servo.move_hand(180, 30);
+    // hand_servo.move_hand(155, 60);
+    // hand_servo.move_hand(130, 90);
+    // Serial.println(falldetect.get_distance(fallpin.mfd));
+
 
     commu.read_serial_buffer();
 
@@ -126,7 +140,7 @@ void recieve_jetson_nano_action(char mission_code){
      * commu.send_jetson_nano_mission(bool mission_success)
      */
 
-    bool good_done = true;
+    char good_done = 'a';
     Serial.print("action code: ");
     Serial.println(mission_code);
 
@@ -281,7 +295,8 @@ void recieve_jetson_nano_action(char mission_code){
             break;
     }
 
-
+    Serial.print("return code: ");
+    Serial.println(good_done);
     commu.send_jetson_nano_mission(good_done);
 
 }
@@ -314,7 +329,7 @@ void first_go_front_side(){
 
     move('d', speed_range[1], 500);
 
-    goto_until_detect(fallpin.mfd, 'w', speed_range[0], 10);
+    goto_until_detect(fallpin.mfd, 'w', speed_range[0], 15);
 
 }
 
@@ -328,7 +343,7 @@ void first_re_go_front_side(){
     toward_target_angle();
     goto_edge(fallpin.lmd, 'a', speed_range[0]);
     move('d', speed_range[1], 500);
-    goto_until_detect(fallpin.mfd, 'w', speed_range[0], 10);
+    goto_until_detect(fallpin.mfd, 'w', speed_range[0], 15);
 }
 
 /**
@@ -338,7 +353,7 @@ void first_re_go_front_side(){
 void first_go_right_side(){
     target_angle = 0;
     toward_target_angle();
-    goto_until_detect(fallpin.mfd, 'w', speed_range[0], 10);
+    goto_until_detect(fallpin.mfd, 'w', speed_range[0], 12);
     goto_until_no_detect(fallpin.mfd, 'd', speed_range[1], 20);
     move('d', speed_range[1], 500);
     move('w', speed_range[1], 650);

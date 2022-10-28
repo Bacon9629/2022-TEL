@@ -52,11 +52,11 @@ void Communicate::read_serial_buffer(){
     // delay(_READ_DELAY_);
 }
 
-void Communicate::send_jetson_nano_mission(bool mission_success){
+void Communicate::send_jetson_nano_mission(char mission_success){
     if (!jetson_nano_Serial){
         return;
     }
-    (*jetson_nano_Serial).print(mission_success ? 'a' : 'b');
+    (*jetson_nano_Serial).print(mission_success);
 }
 
 void Communicate::send_motor_mega(int now_angle, int target_angle, char dir_code, int speed){

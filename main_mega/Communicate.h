@@ -42,7 +42,7 @@ public:
 
     void read_serial_buffer();  // 放進loop迴圈內一直跑
 
-    void send_jetson_nano_mission(bool mission_success);
+    void send_jetson_nano_mission(char mission_success);
     void send_motor_mega(int now_angle, int target_angle, char dir_code, int speed);
 
     inline int get_angle();
