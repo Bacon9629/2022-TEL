@@ -343,7 +343,8 @@ void first_re_go_front_side(){
     toward_target_angle();
     goto_edge(fallpin.lmd, 'a', speed_range[0]);
     move('d', speed_range[1], 500);
-    goto_until_detect(fallpin.mfd, 'w', speed_range[0], 15);
+    // goto_until_detect(fallpin.mfd, 'w', speed_range[0], 15);
+    goto_keep_distance(fallpin.mfd, 'w', 's', 15);
 }
 
 /**
@@ -377,7 +378,8 @@ void first_re_go_right_side(){
     goto_until_no_detect(fallpin.mfd, 'a', speed_range[1], 30);
     goto_until_detect(fallpin.mfd, 'd', speed_range[1], 30);
     move('d', speed_range[1], 650);
-    goto_until_detect(fallpin.mfd, 'w', speed_range[0], 13);
+    goto_keep_distance(fallpin.mfd, 'w', 's', 13);
+    // goto_until_detect(fallpin.mfd, 'w', speed_range[0], 13);
     // toward_target_angle();
 
 }
@@ -410,7 +412,8 @@ void first_re_go_back_side(){
     toward_target_angle();
     goto_edge(fallpin.rmd, 'd', speed_range[0]);
     move('a', speed_range[1], 300);
-    goto_until_detect(fallpin.mfd, 'w', speed_range[0], 13);
+    // goto_until_detect(fallpin.mfd, 'w', speed_range[0], 13);
+    goto_keep_distance(fallpin.mfd, 'w', 's', 13);
 }
 
 /**
