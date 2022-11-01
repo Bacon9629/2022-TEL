@@ -10,6 +10,7 @@
         "string_view": "cpp",
         "initializer_list": "cpp",
         "*.tcc": "cpp",
-        "cstddef": "cpp"
+        "cstddef": "cpp",
+        "iterator_base": "cpp"
     }
 }

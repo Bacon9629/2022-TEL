@@ -192,7 +192,8 @@ inline int Communicate::get_angle(){
         return 0;
     }
     JY901.receiveSerialData();
-    int now_angle = (JY901.getYaw()) * -1;
+    // int now_angle = (JY901.getYaw()) * -1;
+    int now_angle = (JY901.getYaw());
     now_angle = now_angle - first_angle;
     if (now_angle > 180){
         now_angle -= 360;

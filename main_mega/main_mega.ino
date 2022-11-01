@@ -276,12 +276,13 @@ void recieve_jetson_nano_action(char mission_code){
         case 'u':{
             // 第一關定位到方框測
             first_go_right_side();
-            
+            break;
         }
 
         case 'v':{
             // 第一關從方框側到終點方框，倒料後，正面面向終點方框
             first_go_target_from_side();
+            break;
         }
 
         case 'z':{
@@ -341,6 +342,7 @@ void first_re_go_front_side(){
     // 慢速左，直到到邊緣
     target_angle = 0;
     toward_target_angle();
+    goto_keep_distance(fallpin.mfd, 'w', 's', 15);
     goto_edge(fallpin.lmd, 'a', speed_range[0]);
     move('d', speed_range[1], 500);
     // goto_until_detect(fallpin.mfd, 'w', speed_range[0], 15);
@@ -374,7 +376,8 @@ void first_go_right_side(){
 void first_re_go_right_side(){
     target_angle = -90;
     toward_target_angle();
-    goto_until_detect(fallpin.mfd, 'w', speed_range[0], 13);
+    goto_keep_distance(fallpin.mfd, 'w', 's', 13);
+    // goto_until_detect(fallpin.mfd, 'w', speed_range[0], 13);
     goto_until_no_detect(fallpin.mfd, 'a', speed_range[1], 30);
     goto_until_detect(fallpin.mfd, 'd', speed_range[1], 30);
     move('d', speed_range[1], 650);
@@ -391,7 +394,7 @@ void first_re_go_right_side(){
 void first_go_back_side(){
     target_angle = -90;
     toward_target_angle();
-    goto_until_no_detect(fallpin.mfd, 'd', speed_range[0], 30);
+    goto_until_no_detect(fallpin.mfd, 'd', speed_range[1], 30);
     move('d', speed_range[1], 750);
     target_angle = 180;
     toward_target_angle();
@@ -644,22 +647,15 @@ void goto_keep_distance(byte sensor, char approach_dir, char away_dir, int dista
     int now_distance = falldetect.get_distance(sensor);
 
     while(now_distance != distance){
-
+        now_distance = falldetect.get_distance(sensor);
         if (now_distance > distance){
-            goto_until_detect(sensor, approach_dir, 
-                (now_distance - distance) > 5 ? speed_range[1] : speed_range[0],
-                distance
-            );
+          move(approach_dir, speed_range[0], 10);
         }else{
-            goto_until_detect(sensor, away_dir, 
-                (distance - now_distance) > 5 ? speed_range[1] : speed_range[0],
-                distance
-            );
+          move(away_dir, speed_range[0], 10);
         }
-
-        delay(200);
-
     }
+    move('p', 0, 10);
+
 }
 
 /**
@@ -709,8 +705,6 @@ void goto_until_no_detect(byte sensor, char direction, int speed, int distance){
 }
 
 void toward_target_angle(){
-    char temp = Serial.read();
-    Serial.println(temp);
     now_angle = commu.get_angle();
     int angle = now_angle - target_angle;
     int angle_unsigned = abs(angle);
