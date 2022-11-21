@@ -215,25 +215,26 @@ void recieve_jetson_nano_action(char mission_code){
         
         case 'i':{
             // 第一關重新定位到終點方框
-
+            first_from_start_line_go_target_front();
             break;
         }
 
         case 'j':{
             // 從第一關出發到第二關，並自動通過第二三關
-
+            first_from_start_directly_go_second_and_third();
             break;
         }
         
         case 'k':{
             // 從第二關重新開始
-
+            second_mission();
+            third_mission();
             break;
         }
         
         case 'l':{
             // 從第三關重新開始
-
+            third_mission();
             break;
         }
         
@@ -245,7 +246,7 @@ void recieve_jetson_nano_action(char mission_code){
         }
         
         case 'n':{
-            // 更新初始角度，會依此角隊做回正
+            // 更新初始角度，會依此角度做回正的0度角
             commu.reset_angle_offset();
             break;
         }
@@ -299,6 +300,11 @@ void recieve_jetson_nano_action(char mission_code){
             // 第一關從方框側到終點方框，倒料後，正面面向終點方框
             first_go_target_from_side();
             break;
+        }
+
+        case 'w':{
+            // 從第一關終點方框前往第二關前進
+            first_go_sencond_start_from_target_front();
         }
 
         case 'z':{
@@ -449,7 +455,7 @@ void first_go_target_from_front(){
     toward_target_angle();
     goto_until_detect(fallpin.mbd, 's', speed_range[1], 8);
     first_shake_to_out_storage();
-    first_go_sencond_from_target_front();
+    // first_go_sencond_from_target_front();
 
 }
 
@@ -470,7 +476,7 @@ void first_go_target_from_side(){
     // toward_target_angle();
     goto_until_detect(fallpin.mbd, 's', speed_range[0], 8);
     first_shake_to_out_storage();
-    first_go_sencond_from_target_front();
+    // first_go_sencond_from_target_front();
 }
 
 
@@ -488,7 +494,7 @@ void first_go_target_from_back(){
     toward_target_angle();
     goto_until_detect(fallpin.mbd, 's', speed_range[0], 8);
     first_shake_to_out_storage();
-    first_go_sencond_from_target_front();
+    // first_go_sencond_from_target_front();
 }
 
 /**
@@ -509,20 +515,55 @@ void first_shake_to_out_storage(){
 
     delay(3000);
     storage_out(false);
+
+    move('w', speed_range[2], 300);
+    move('p', speed_range[2], 300);
+
+    target_angle = 0;
+    toward_target_angle();
+
 }
 
 /**
  * @brief 從目標方框前到第二關
  * 
  */
-void first_go_sencond_from_target_front(){
-    goto_until_no_detect(fallpin.mbd, 'd', speed_range[1], 20);
-    move('d', speed_range[2], 550);
-    target_angle = 0;
-    toward_target_angle();
-    move('w', speed_range[2], 3000);
-    move('p', 0, 100);
+void first_go_sencond_start_from_target_front(){
+    // goto_until_no_detect(fallpin.mbd, 'd', speed_range[1], 20);
+    // move('d', speed_range[2], 550);
+    // target_angle = 0;
+    // toward_target_angle();
+    // move('w', speed_range[2], 3000);
+    // move('p', 0, 100);
 
+    goto_until_detect(fallpin.mfd, 'w', speed_range[1], 15);
+    goto_until_no_detect(fallpin.rmf, 'a', speed_range[1], 25);
+    move('w', speed_range[1], 2000);
+    mpve('p', speed_range[1], 200);
+
+}
+
+/**
+ * @brief 第一關從頭回到終點方框前
+ * 
+ */
+void first_from_start_line_go_target_front(){
+    move('w', speed_range[2], 1000);
+    move('e', speed_range[1], 1500);
+    goto_edge(fallpin.rmd, 'd', speed_range[1]);
+    move('a', speed_range[1], 500);
+    goto_keep_distance(fallpin.mfd, 'w', 's', 10);
+}
+
+/**
+ * @brief 從起點直接去破第二關
+ * 
+ */
+void first_from_start_directly_go_second_and_third(){
+    first_from_start_line_go_target_front();
+    first_go_sencond_start_from_target_front();
+    second_mission();
+    third_mission();
 }
 
 /**
@@ -595,6 +636,41 @@ void stay_center(){
 }
 
 /**
+ * @brief 第三關往終點前進
+ * 
+ */
+void third_mission(){
+    target_angle = 0;
+    goto_edge(fallpin.rmd, 'd', speed_range[0]);
+    move('a', speed_range[1], 400);
+    goto_until_detect(fallpin.rmf, 'w', speed_range[2], 15);
+    
+    // 與前方保持距離並向左移動
+    int keep_dis = 15;
+    target_angle = 0;
+    int dis = (falldetect.get_distance(fallpin.rmf) + falldetect.get_distance(fallpin.lmf)) / 2;
+    while(abs(dis) > 30){
+        target_angle = (dis - keep_dis) * 5;
+        move('a', speed_range[1], 50);
+        dis = (falldetect.get_distance(fallpin.rmf) + falldetect.get_distance(fallpin.lmf)) / 2;
+    }
+    target_angle = 0;
+    goto_until_no_detect(fallpin.rmf, 'a', speed_range[1], 30);
+    move('a', speed_range[1], 400);
+
+    target_angle = 90;
+    toward_target_angle();
+    goto_until_detect(fallpin.rmf, 'a', speed_range[0], 25);
+    // move('a', speed_range[0], 200);
+    // goto_until_no_detect(fallpin.rmf, 'a', speed_range[0], 25);
+    move('a', speed_range[0], 500);
+
+    move('w', speed_range[1], 1000);
+    move('a', speed_range[1], 1000);
+
+}
+
+/**
  * @brief 在main_mega程式內才能呼叫的移動函式
  * 
  * @param direction 移動指令編碼
@@ -649,9 +725,17 @@ void goto_keep_distance(byte sensor, char approach_dir, char away_dir, int dista
     while(now_distance != distance){
         now_distance = falldetect.get_distance(sensor);
         if (now_distance > distance){
-          move(approach_dir, speed_range[0], 10);
+            if (now_distance - distance > 10){
+                move(approach_dir, speed_range[2], 10);
+            }else{
+                move(approach_dir, speed_range[0], 10);
+            }
         }else{
-          move(away_dir, speed_range[0], 10);
+            if (distance - now_distance > 10){
+                move(away_dir, speed_range[1], 10);
+            }else{
+                move(away_dir, speed_range[0], 10);
+            }
         }
     }
     move('p', 0, 10);
