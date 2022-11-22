@@ -38,13 +38,20 @@ int FallDetect::get_distance(byte pin){
     }
     hand_servo.temp_detach();
 
-    const size_t size = 100;  // 這裡改取值次數
+    const size_t size = 300;  // 這裡改取值次數
 
     double history[size];
     double result = 0;
 
     for (size_t i=0;i<size;i++){
-        double temp = 13 * pow((analogRead(pin) * 0.0048828125), -1);
+        double temp;
+        // if (fallpin.rff == pin){
+        //     temp = 10650.08 * pow(analogRead(pin),-0.935) - 10;
+        // }else{
+        //     temp = 13 * pow((analogRead(pin) * 0.0048828125), -1);
+        // }
+        temp = 13 * pow((analogRead(pin) * 0.0048828125), -1);
+        
 
         // int sum = 0;
         // for (int i=0; i<100; i++){
@@ -57,18 +64,36 @@ int FallDetect::get_distance(byte pin){
 
         history[i] = temp;
     }
-    sort(history, size);
+    // sort(history, size);
+    // result = history[90];
+
+    result = history[0];
+    for (size_t i=0;i<size;i++){
+        if (history[i] > result){
+            result = history[i];
+        }
+    }
 
     // result += history[int(result/2)-1];
     // result += history[int(result/2)];
     // result += history[int(result/2)+1];
     // result /= 3;
-    result = history[50];
 
     hand_servo.re_attach();
+    
+    // if (fallpin.rff == pin){
+    //     if (result > 150){
+    //         return 300;
+    //     }
+    // }else{
+    //     if (result > 30){
+    //         return 300;
+    //     }
+    // }
     if (result > 30){
         return 100;
     }
+
     return int(result);
 }
 

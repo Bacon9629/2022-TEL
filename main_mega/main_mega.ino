@@ -64,8 +64,11 @@ void loop(){
 
     static bool check = false;
     if (check){
-        Serial.println(commu.get_angle());
-        Serial.println(falldetect.get_distance(fallpin.mfd));
+        char a[50];
+        sprintf(a, "angle: %03d, mfd: %03d, mfd: %03d, mbd: %03d"
+            , commu.get_angle(), falldetect.get_distance(fallpin.mfd),
+            falldetect.get_distance(fallpin.mfd), falldetect.get_distance(fallpin.mbd));
+        Serial.println(a);
     }
     if (Serial.available()){
         char temp = Serial.read();
@@ -94,6 +97,8 @@ void loop(){
             first_go_target_from_back();
         }else if(temp == 'k'){
             second_mission();
+        }else if (temp == 'l'){
+            third_mission();
         }
     }
 
@@ -248,6 +253,7 @@ void recieve_jetson_nano_action(char mission_code){
         case 'n':{
             // 更新初始角度，會依此角度做回正的0度角
             commu.reset_angle_offset();
+            target_angle = 0;
             break;
         }
         
@@ -305,6 +311,9 @@ void recieve_jetson_nano_action(char mission_code){
         case 'w':{
             // 從第一關終點方框前往第二關前進
             first_go_sencond_start_from_target_front();
+            second_mission();
+            third_mission();
+            break;
         }
 
         case 'z':{
@@ -362,6 +371,7 @@ void first_go_front_side(){
  */
 void first_re_go_front_side(){
     // 慢速左，直到到邊緣
+    move('s', speed_range[1], 300);
     target_angle = 0;
     toward_target_angle();
     goto_keep_distance(fallpin.mfd, 'w', 's', 10);
@@ -416,8 +426,8 @@ void first_re_go_right_side(){
 void first_go_back_side(){
     target_angle = -90;
     toward_target_angle();
-    goto_until_no_detect(fallpin.mfd, 'd', speed_range[1], 30);
-    move('d', speed_range[1], 1250);
+    goto_until_no_detect(fallpin.mfd, 'd', speed_range[1], 25);
+    move('d', speed_range[1], 2000);
     target_angle = 180;
     toward_target_angle();
     move('d', speed_range[1], 1000);
@@ -503,13 +513,14 @@ void first_go_target_from_back(){
  */
 void first_shake_to_out_storage(){
 
+    move('s', speed_range[0], 300);
     storage_out(true);
     delay(3000);
 
     for(int i=0;i<3;i++){
         move('w', speed_range[2], 150);
         move('p', 0, 100);
-        move('s', speed_range[2], 250);
+        move('s', speed_range[2], 300);
         move('p', 0, 100);
     }
 
@@ -521,6 +532,8 @@ void first_shake_to_out_storage(){
 
     target_angle = 0;
     toward_target_angle();
+
+    goto_keep_distance(fallpin.mfd, 'w', 's', 10);
 
 }
 
@@ -537,12 +550,13 @@ void first_go_sencond_start_from_target_front(){
     // move('p', 0, 100);
 
     goto_until_detect(fallpin.mfd, 'w', speed_range[1], 15);
-    goto_until_no_detect(fallpin.rmf, 'a', speed_range[1], 25);
+    goto_until_no_detect(fallpin.mfd, 'a', speed_range[1], 25);
+    move('a', speed_range[1], 800);
     move('w', speed_range[1], 2000);
-    mpve('p', speed_range[1], 200);
+    move('p', speed_range[1], 200);
 
 }
-
+    
 /**
  * @brief 第一關從頭回到終點方框前
  * 
@@ -643,31 +657,28 @@ void third_mission(){
     target_angle = 0;
     goto_edge(fallpin.rmd, 'd', speed_range[0]);
     move('a', speed_range[1], 400);
-    goto_until_detect(fallpin.rmf, 'w', speed_range[2], 15);
-    
-    // 與前方保持距離並向左移動
-    int keep_dis = 15;
-    target_angle = 0;
-    int dis = (falldetect.get_distance(fallpin.rmf) + falldetect.get_distance(fallpin.lmf)) / 2;
-    while(abs(dis) > 30){
-        target_angle = (dis - keep_dis) * 5;
-        move('a', speed_range[1], 50);
-        dis = (falldetect.get_distance(fallpin.rmf) + falldetect.get_distance(fallpin.lmf)) / 2;
-    }
-    target_angle = 0;
-    goto_until_no_detect(fallpin.rmf, 'a', speed_range[1], 30);
-    move('a', speed_range[1], 400);
+    goto_until_detect(fallpin.lmf, 'w', speed_range[2], 28);
 
-    target_angle = 90;
-    toward_target_angle();
-    goto_until_detect(fallpin.rmf, 'a', speed_range[0], 25);
-    // move('a', speed_range[0], 200);
-    // goto_until_no_detect(fallpin.rmf, 'a', speed_range[0], 25);
-    move('a', speed_range[0], 500);
+    // move('d', speed_range[1], 1500);
+    // goto_edge(fallpin.rmd, 'd', speed_range[0]);
+    // move('a', speed_range[1], 700);
 
-    move('w', speed_range[1], 1000);
+    move('s', speed_range[1], 1000);
+    target_angle = 85;
+    toward_target_angle_2();
+    move('d', speed_range[2], 500);
+    goto_until_detect(fallpin.lff, 'a', speed_range[0], 15);
+    goto_until_no_detect(fallpin.lff, 's', speed_range[0], 28);
+    move('s', speed_range[1], 400);
+
+    goto_until_detect(fallpin.rmf, 'a', speed_range[0], 28);
+    move('a', speed_range[1], 500);
+
+    // target_angle = 80;
+    // goto_until_detect(fallpin.lff, 'w', speed_range[1], 15);
+    move('w', speed_range[1], 1500);
     move('a', speed_range[1], 1000);
-
+    move('p', speed_range[0], 20);
 }
 
 /**
@@ -725,17 +736,17 @@ void goto_keep_distance(byte sensor, char approach_dir, char away_dir, int dista
     while(now_distance != distance){
         now_distance = falldetect.get_distance(sensor);
         if (now_distance > distance){
-            if (now_distance - distance > 10){
-                move(approach_dir, speed_range[2], 10);
-            }else{
+            // if (now_distance - distance > 10){
+            //     move(approach_dir, speed_range[2], 10);
+            // }else{
                 move(approach_dir, speed_range[0], 10);
-            }
+            // }
         }else{
-            if (distance - now_distance > 10){
-                move(away_dir, speed_range[1], 10);
-            }else{
+            // if (distance - now_distance > 10){
+            //     move(away_dir, speed_range[1], 10);
+            // }else{
                 move(away_dir, speed_range[0], 10);
-            }
+            // }
         }
     }
     move('p', 0, 10);
@@ -849,6 +860,71 @@ void toward_target_angle(){
         }
         angle = _now_angle - _target_angle;
         angle_unsigned = abs(angle);
+        // Serial.println(angle);
+    }
+}
+
+void toward_target_angle_2(){
+    now_angle = commu.get_angle();
+    int _now_angle = now_angle;
+    int _target_angle = target_angle;
+
+    if (_target_angle == 180){
+        _target_angle = 0;
+        if (_now_angle > 0){
+            _now_angle = _now_angle - 180;
+        }else{
+            _now_angle = (_now_angle + 180);
+        }
+    }
+    int angle = _now_angle - _target_angle;
+    int angle_unsigned = abs(angle);
+    // Serial.println(angle);
+
+    // while (angle_unsigned > 0){
+    while (angle_unsigned > 0){
+        if (angle < -180){
+            angle += 360;
+            angle_unsigned = 360 - angle_unsigned;
+        }
+
+        commu.send_motor_mega(
+            _now_angle, _target_angle, 
+            angle > 0 ? 'n' : 'm', 
+            1.25 * (map(angle_unsigned, 0, 180, 20, 100))
+        );
+        delay(40);
+
+        now_angle = commu.get_angle();
+        _now_angle = now_angle;
+        _target_angle = target_angle;
+        if (_target_angle == 180){
+            _target_angle = 0;
+            if (_now_angle > 0){
+                _now_angle = _now_angle - 180;
+            }else{
+                _now_angle = (_now_angle + 180);
+            }
+        }
+        angle = _now_angle - _target_angle;
+        angle_unsigned = abs(angle);
+        // }
+        // commu.send_motor_mega(_now_angle, _target_angle, 'p', 0);
+        // delay(500);
+
+        // now_angle = commu.get_angle();
+        // _now_angle = now_angle;
+        // _target_angle = target_angle;
+        // if (_target_angle == 180){
+        //     _target_angle = 0;
+        //     if (_now_angle > 0){
+        //         _now_angle = _now_angle - 180;
+        //     }else{
+        //         _now_angle = (_now_angle + 180);
+        //     }
+        // }
+        // angle = _now_angle - _target_angle;
+        // angle_unsigned = abs(angle);
         // Serial.println(angle);
     }
 }
