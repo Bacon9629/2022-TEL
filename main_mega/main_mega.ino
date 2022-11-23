@@ -128,7 +128,7 @@ void recieve_jetson_nano(char dir_code, int speed, int __target_angle, int servo
 
     now_angle = commu.get_angle();
     _now_angle = now_angle;
-    _target_angle = target_angle;
+    _target_angle = __target_angle;
     if (_target_angle == 180){
         _target_angle = 0;
         if (_now_angle > 0){
@@ -430,7 +430,7 @@ void first_go_back_side(){
     move('d', speed_range[1], 2000);
     target_angle = 180;
     toward_target_angle();
-    move('d', speed_range[1], 1000);
+    move('d', speed_range[1], 1500);
     goto_edge(fallpin.rmd, 'd', speed_range[0]);
     move('a', speed_range[1], 300);
     goto_until_detect(fallpin.mfd, 'w', speed_range[0], 10);
@@ -513,7 +513,7 @@ void first_go_target_from_back(){
  */
 void first_shake_to_out_storage(){
 
-    move('s', speed_range[0], 300);
+    move('s', speed_range[0], 1000);
     storage_out(true);
     delay(3000);
 
@@ -564,7 +564,7 @@ void first_go_sencond_start_from_target_front(){
 void first_from_start_line_go_target_front(){
     move('w', speed_range[2], 1000);
     move('e', speed_range[1], 1500);
-    goto_edge(fallpin.rmd, 'd', speed_range[1]);
+    goto_edge(fallpin.rmd, 'd', speed_range[0]);
     move('a', speed_range[1], 500);
     goto_keep_distance(fallpin.mfd, 'w', 's', 10);
 }
