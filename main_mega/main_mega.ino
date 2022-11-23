@@ -447,8 +447,9 @@ void first_re_go_back_side(){
     toward_target_angle();
     goto_edge(fallpin.rmd, 'd', speed_range[0]);
     move('a', speed_range[1], 300);
-    // goto_until_detect(fallpin.mfd, 'w', speed_range[0], 10);
-    goto_keep_distance(fallpin.mfd, 'w', 's', 10);
+    move('s', speed_range[1], 500);
+    goto_until_detect(fallpin.mfd, 'w', speed_range[0], 10);
+    // goto_keep_distance(fallpin.mfd, 'w', 's', 10);
 }
 
 /**
@@ -460,7 +461,7 @@ void first_go_target_from_front(){
     move('e', speed_range[2], 2500);
     goto_edge(fallpin.rmd, 'e', speed_range[0]);
 
-    move('a', speed_range[1], 500);
+    move('a', speed_range[1], 450);
     target_angle = 180;
     toward_target_angle();
     goto_until_detect(fallpin.mbd, 's', speed_range[1], 8);
@@ -479,7 +480,7 @@ void first_go_target_from_side(){
     // target_angle = 0;
     toward_target_angle();
     goto_edge(fallpin.lmd, 'a', speed_range[0]);
-    move('d', speed_range[1], 500);
+    move('d', speed_range[1], 450);
 
     // move('a', speed_range[1], 500);
     // target_angle = 180;
@@ -500,7 +501,7 @@ void first_go_target_from_back(){
     goto_edge(fallpin.lmd, 'a', speed_range[0]);
 
 
-    move('d', speed_range[1], 500);
+    move('d', speed_range[1], 450);
     toward_target_angle();
     goto_until_detect(fallpin.mbd, 's', speed_range[0], 8);
     first_shake_to_out_storage();
