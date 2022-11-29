@@ -309,7 +309,7 @@ void recieve_jetson_nano_action(char mission_code){
         }
 
         case 'w':{
-            // 從第一關終點方框前往第二關前進
+            // 從第一關終點方框前往第二關前進、並破完二三關
             first_go_sencond_start_from_target_front();
             second_mission();
             third_mission();
@@ -586,12 +586,17 @@ void first_from_start_directly_go_second_and_third(){
  * 
  */
 void second_mission(){
+    // Serial.println("second mission");
+    move('d', speed_range[1], 1000);
     goto_edge(fallpin.rmd, 'd', speed_range[0]);
     move('a', speed_range[1], 750);
+    // toward_target_angle();
     goto_until_detect(fallpin.rff, 'w',speed_range[1], 25);
     // move('a', speed_range[1], 1000);
     move('w', speed_range[1], 300);
-    stay_center();
+    goto_until_no_detect(fallpin.lff, 'w', speed_range[2], 30);
+
+    // stay_center();
     // move('w', speed_range[1], 1000);
     // move('p', 0, 10);
     // return;
@@ -599,24 +604,28 @@ void second_mission(){
     // 前往下一個區域
     // 往前直到真測到左方有東西，往後一點在往左走，直到沒偵測到木條後往前走
     move('w', speed_range[1], 1000);
-    move('a', speed_range[1], 1500);
+    move('a', speed_range[2], 1750);
     goto_edge(fallpin.lmd, 'a', speed_range[0]);
     move('d', speed_range[1], 750);
     move('w', speed_range[1], 1000);
-    stay_center();
+    goto_until_no_detect(fallpin.lff, 'w', speed_range[2], 30);
+
+    // stay_center();
 
     // 前往下一個區域
     // 往前直到真測到右方有東西，往後一點在往右走，直到沒偵測到木條後往前走
-    move('w', speed_range[1], 1000);
+    move('w', speed_range[1], 850);
     goto_until_detect(fallpin.lmf, 'd', speed_range[0], 27);  // 平移植到映前偵測碰到東西move('a', speed_range[1], 300);
     goto_until_no_detect(fallpin.lmf, 'd', speed_range[0], 27);
-    move('d', speed_range[1], 250);
+    move('d', speed_range[1], 200);
     move('w', speed_range[1], 1000);
-    stay_center();
-    move('p', 0, 10);
+    goto_until_no_detect(fallpin.lff, 'w', speed_range[2], 30);
+    // stay_center();
+    // move('p', 0, 10);
 
     // 通過第二關
-    move('w', speed_range[1], 2500);
+    move('w', speed_range[2], 1500);
+    move('p', speed_range[1], 10);
 
 
 
@@ -656,29 +665,32 @@ void stay_center(){
  */
 void third_mission(){
     target_angle = 0;
+    move('d', speed_range[1], 350);
     goto_edge(fallpin.rmd, 'd', speed_range[0]);
     move('a', speed_range[1], 400);
+    toward_target_angle();
     goto_until_detect(fallpin.lmf, 'w', speed_range[2], 28);
 
     // move('d', speed_range[1], 1500);
     // goto_edge(fallpin.rmd, 'd', speed_range[0]);
     // move('a', speed_range[1], 700);
 
-    move('s', speed_range[1], 1000);
-    target_angle = 85;
+    move('s', speed_range[1], 900);
+    target_angle = 83;
     toward_target_angle_2();
-    move('d', speed_range[2], 500);
-    goto_until_detect(fallpin.lff, 'a', speed_range[0], 15);
+    target_angle = 85;
+    // move('d', speed_range[2], 500);
+    goto_until_detect(fallpin.lff, 'a', speed_range[0], 13);
     goto_until_no_detect(fallpin.lff, 's', speed_range[0], 28);
-    move('s', speed_range[1], 400);
+    move('s', speed_range[1], 250);
 
     goto_until_detect(fallpin.rmf, 'a', speed_range[0], 28);
-    move('a', speed_range[1], 500);
+    move('a', speed_range[1], 350);
 
     // target_angle = 80;
     // goto_until_detect(fallpin.lff, 'w', speed_range[1], 15);
-    move('w', speed_range[1], 1500);
-    move('a', speed_range[1], 1000);
+    move('w', speed_range[1], 1000);
+    move('a', speed_range[1], 5000);
     move('p', speed_range[0], 20);
 }
 
@@ -892,7 +904,7 @@ void toward_target_angle_2(){
         commu.send_motor_mega(
             _now_angle, _target_angle, 
             angle > 0 ? 'n' : 'm', 
-            1.25 * (map(angle_unsigned, 0, 180, 20, 100))
+            1 * (map(angle_unsigned, 0, 180, 20, 100))
         );
         delay(40);
 
