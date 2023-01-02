@@ -43,12 +43,17 @@ void setup() {
   // Serial.begin(115200);
 
   comm.attach_Serial(&Serial1);
+//  comm.attach_Serial(&Serial);
+//  comm.attach_Serial(&Serial1);
+//  comm.attach_Serial(&Serial1);
   // comm.start_debug_with_Serial0();
   // motor.start_debug_with_Serial0();
 
+
+  comm.register_recieve_wheel_pwm(&recieve_wheel_pwm);
   comm.register_recieve_angle(&recieve_angle);
-  comm.register_recieve_move_code(&recieve_move);
-  comm.register_recieve_stop(&recieve_stop);
+//  comm.register_recieve_move_code(&recieve_move);
+//  comm.register_recieve_stop(&recieve_stop);
 
 }
 
@@ -77,6 +82,13 @@ void loop() {
   // analogWrite(rb_pwm_pin, 220);
 
   
+}
+
+void recieve_wheel_pwm(int pwm0, int pwm1, int pwm2, int pwm3){
+    motor.one_wheel_move(0, pwm0);
+    motor.one_wheel_move(1, pwm1);
+    motor.one_wheel_move(2, pwm2);
+    motor.one_wheel_move(3, pwm3);
 }
 
 void recieve_angle(int now_angle_, int target_angle_){

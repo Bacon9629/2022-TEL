@@ -57,6 +57,29 @@ void Communicate::read_code_buffer()
 
         switch (code)
         {
+            case '<':{
+                delay(1);
+
+                int speed[4] = {0, 0, 0, 0};
+
+                for(size_t i=0; i < 4; i++){
+
+                    char dir = _serial->read();
+                    if (dir == '-'){
+                        speed[i] -= char2int(_serial);
+                    }else{
+                        speed[i] = char2int(_serial);
+                    }
+
+                }
+
+                if (recieve_wheel_pwm)
+                {
+                    (*recieve_wheel_pwm)(speed[0], speed[1], speed[2], speed[3]);
+                }
+                break;
+            }
+
             case '[':
             {
                 delay(1);
@@ -132,6 +155,11 @@ void Communicate::read_code_buffer()
     {   
         (*recieve_move_func)(result_code, result_speed);
     }
+}
+
+void Communicate::register_recieve_wheel_pwm(void (*function)(int pwm0, int pwm1, int pwm2, int pwm3))
+{
+    recieve_wheel_pwm = function;
 }
 
 void Communicate::register_recieve_angle(void (*function)(int now_angle, int target_angle))

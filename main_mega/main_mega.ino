@@ -65,9 +65,9 @@ void loop(){
     static bool check = false;
     if (check){
         char a[50];
-        sprintf(a, "angle: %03d, mfd: %03d, mfd: %03d, mbd: %03d"
-            , commu.get_angle(), falldetect.get_distance(fallpin.mfd),
-            falldetect.get_distance(fallpin.mfd), falldetect.get_distance(fallpin.mbd));
+        sprintf(a, "angle: %03d, rff: %03d, mfd: %03d, lff: %03d"
+            , commu.get_angle(), falldetect.get_distance(fallpin.rff),
+            falldetect.get_distance(fallpin.mfd), falldetect.get_distance(fallpin.lff));
         Serial.println(a);
     }
     if (Serial.available()){
@@ -589,7 +589,7 @@ void second_mission(){
     // Serial.println("second mission");
     move('d', speed_range[1], 1000);
     goto_edge(fallpin.rmd, 'd', speed_range[0]);
-    move('a', speed_range[1], 750);
+    move('a', speed_range[1], 650);
     // toward_target_angle();
     goto_until_detect(fallpin.rff, 'w',speed_range[1], 25);
     // move('a', speed_range[1], 1000);
@@ -604,7 +604,7 @@ void second_mission(){
     // 前往下一個區域
     // 往前直到真測到左方有東西，往後一點在往左走，直到沒偵測到木條後往前走
     move('w', speed_range[1], 1000);
-    move('a', speed_range[2], 1750);
+    move('a', speed_range[2], 1650);
     goto_edge(fallpin.lmd, 'a', speed_range[0]);
     move('d', speed_range[1], 750);
     move('w', speed_range[1], 1000);
@@ -678,7 +678,7 @@ void third_mission(){
     move('s', speed_range[1], 900);
     target_angle = 83;
     toward_target_angle_2();
-    target_angle = 85;
+    // target_angle = 83;
     // move('d', speed_range[2], 500);
     goto_until_detect(fallpin.lff, 'a', speed_range[0], 13);
     goto_until_no_detect(fallpin.lff, 's', speed_range[0], 28);
